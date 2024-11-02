@@ -112,67 +112,80 @@ void search_student() {
 }
 
 void export_students() {
+    // 원본 파일을 읽기 모드 ("r")
     FILE *file = fopen(FILENAME, "r");
-    char search_term[20];
-    int export_type;
+    char search_term[20];  // 검색어를 저장할 배열
+    int export_type;       // 내보내기 방법을 저장할 변수
 
+    // 혹여나 오류 처리
     if (file == NULL) {
-        perror("파일 열기 오류");
-        return;
+        perror("파일 열기 오류");  // 오류 메시지를 출력합니다.
+        return;  // 함수 종료
     }
 
+    // 내보내기 옵션을 선택하는 곳
     printf("1. 전체 내보내기\n2. 특정 학번 내보내기\n3. 특정 학과 내보내기\n내보내기 방법 선택: ");
     scanf("%d", &export_type);
 
+    // 특정 학번 또는 특정 학과를 선택한 경우 scanf로 입력 받기
     if (export_type == 2 || export_type == 3) {
         printf("검색어 입력: ");
         scanf("%s", search_term);
     }
 
-    char line[200];
-    char filename[50];
-    FILE *output_file = NULL;
+    char line[200];        // 원본 파일에서 한 줄씩 읽어올 배열 (나중에 학생 수가 더 많으면 늘려야 함)
+    char filename[50];     // 생성할 파일 이름을 저장할 배열
+    FILE *output_file = NULL;  // 내보내기할 파일의 포인터
 
+    // 내보내기 방식에 따라 파일 이름과 모드 설정
     if (export_type == 1) {
-        strcpy(filename, "전체학생정보.txt");
-        output_file = fopen(filename, "w");
+        strcpy(filename, "전체학생정보.txt");  // 전체 내보내기일 때의 파일 이름
+        output_file = fopen(filename, "w");    // 쓰기 모드("w")로 새 파일을 열기
     } else if (export_type == 2) {
-        sprintf(filename, "학번_%s_학생정보.txt", search_term);
+        sprintf(filename, "학번_%s_학생정보.txt", search_term);  // 학번 기준으로 파일 이름 설정
         output_file = fopen(filename, "w");
     } else if (export_type == 3) {
-        sprintf(filename, "학과_%s_학생정보.txt", search_term);
+        sprintf(filename, "학과_%s_학생정보.txt", search_term);  // 학과 기준으로 파일 이름 설정
         output_file = fopen(filename, "w");
     }
 
+    // 내보내기할 파일이 제대로 열리지 않았을 경우 혹시나 하는 오류처리
     if (output_file == NULL) {
-        perror("파일 작성 오류");
-        fclose(file);
-        return;
+        perror("파일 작성 오류");  // 오류 메시지를 출력합니다.
+        fclose(file);  // 원본 파일 닫기
+        return;        // 함수 종료
     }
 
-    int found = 0;
+    int found = 0;  // 검색 결과가 있는지 여부를 저장할 변수
 
+    // 원본 파일을 한 줄씩 읽어가며 조건에 맞는 데이터 필터링
     while (fgets(line, sizeof(line), file)) {
         Student student;
+        // 읽어온 데이터를 쉼표(,) 기준으로 분리하여 Student 구조체에 저장
         sscanf(line, "%[^,],%[^,],%[^,],%[^,],%s", student.id, student.name, student.department, student.email, student.phone);
 
-        if (export_type == 1 ||
-            (export_type == 2 && strcmp(student.id, search_term) == 0) ||
-            (export_type == 3 && strcmp(student.department, search_term) == 0)) {
-            fprintf(output_file, "학번: %s, 이름: %s, 학과: %s, 이메일: %s, 전화번호: %s\n", student.id, student.name, student.department, student.email, student.phone);
-            found = 1;
-            }
+        // 내보내기 조건을 확인하여 조건에 맞는 데이터만 파일에 기록
+        if (export_type == 1 ||  // 전체 내보내기
+            (export_type == 2 && strcmp(student.id, search_term) == 0) ||  // 학번이 검색어와 일치할 때
+            (export_type == 3 && strcmp(student.department, search_term) == 0)) {  // 학과가 검색어와 일치할 때
+            fprintf(output_file, "학번: %s, 이름: %s, 학과: %s, 이메일: %s, 전화번호: %s\n",
+                    student.id, student.name, student.department, student.email, student.phone);
+            found = 1;  // 검색 결과가 있음을 표시
+        }
     }
 
+    // 검색 결과가 없는 경우 사용자에게 알림
     if (!found && (export_type == 2 || export_type == 3)) {
         printf("내보낼 정보가 없습니다.\n");
     } else {
         printf("%s에 내보내기 완료되었습니다.\n", filename);
     }
 
-    fclose(file);
-    fclose(output_file);
+    // 파일 포인터 닫기
+    fclose(file);          // 원본 파일 닫기
+    fclose(output_file);    // 내보내기 파일 닫기
 }
+
 
 // 학생 정보를 삭제하는 함수
 void delete_student() {
@@ -196,7 +209,7 @@ void delete_student() {
         return;
     }
 
-    char line[200];
+    char line[200]; // 원본 파일에서 한 줄씩 읽어올 배열 (나중에 학생 수가 더 많으면 늘려야 함)
     int found = 0;
 
     // 이 코드는 원본 파일에서 한 줄씩 학생 정보를 읽어와, 삭제할 학번과 비교하여 삭제 대상이 아닌 데이터만 임시 파일에 기록합니다.
