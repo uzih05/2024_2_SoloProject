@@ -9,17 +9,12 @@
 
 // 학생 정보를 저장할 구조체 정의
 typedef struct {
-    char id[10];
+    int id;
     char name[20];
     char department[20];
     char email[30];
     char phone[15];
 } Student;
-
-// 줄바꿈 문자 제거 함수
-void remove_newline(char *str) {
-    str[strcspn(str, "\n")] = '\0';
-}
 
 // 학생 정보 불러오기 함수
 int load_students(Student *students) {
@@ -30,7 +25,7 @@ int load_students(Student *students) {
 
     char line[200];
     while (fgets(line, sizeof(line), file)) {
-        sscanf(line, "%[^,],%[^,],%[^,],%[^,],%s", students[count].id, students[count].name,
+        sscanf(line, "%d,%[^,],%[^,],%[^,],%s", &students[count].id, students[count].name,
                students[count].department, students[count].email, students[count].phone);
         count++;
     }
@@ -38,26 +33,26 @@ int load_students(Student *students) {
     return count;
 }
 
-// 학생 정보 저장 함수 (오름차순으로)
+// 학생 정보 저장 함수
 void save_students(Student *students, int count) {
     FILE *file = fopen(FILENAME, "w");
     for (int i = 0; i < count; i++) {
-        fprintf(file, "%s,%s,%s,%s,%s\n", students[i].id, students[i].name, students[i].department, students[i].email, students[i].phone);
+        fprintf(file, "%d,%s,%s,%s,%s\n", students[i].id, students[i].name, students[i].department,
+                students[i].email, students[i].phone);
     }
     fclose(file);
 }
 
-// 학생 정보 추가 함수 (오름차순으로 추가 후 정렬)
+// 학생 정보 추가 함수
 void add_student() {
     Student student;
-    Student students[100];  // 최대 100명 학생 정보를 저장할 수 있음 (필요시 조정 가능)
+    Student students[100];
 
-    // 기존 학생 정보를 로드
     int count = load_students(students);
 
     // 사용자로부터 새로운 학생 정보 입력받기
     printf("학번 입력: ");
-    scanf("%s", student.id);
+    scanf("%d", &student.id);  // 학번을 int로 받음
     printf("이름 입력: ");
     scanf("%s", student.name);
     printf("학과 입력: ");
@@ -70,10 +65,10 @@ void add_student() {
     // 새 학생 정보를 배열에 추가
     students[count++] = student;
 
-    // 학번을 기준으로 오름차순 정렬 (교과서 Bubble Sort 사용)
+    // 학번을 기준으로 오름차순 정렬
     for (int i = 0; i < count - 1; i++) {
         for (int j = i + 1; j < count; j++) {
-            if (strcmp(students[i].id, students[j].id) > 0) {
+            if (students[i].id > students[j].id) {
                 Student temp = students[i];
                 students[i] = students[j];
                 students[j] = temp;
@@ -88,11 +83,9 @@ void add_student() {
 }
 
 
-// 학생정보파일에서 학생 정보를 검색하는 함수
+// 학생 정보 검색 함수
 void search_student() {
-    // 파일을 "r" 로 엽니다.
     FILE *file = fopen(FILENAME, "r");
-    char search_term[20];
     int search_type;
 
     if (file == NULL) {
@@ -115,30 +108,40 @@ void search_student() {
         break;
     }
 
-    printf("검색어 입력: ");
-    scanf("%s", search_term);
+    char search_term[20];
+    int search_id = 0;
+
+    if (search_type == 1) {
+        // 학번으로 검색하는 경우
+        printf("검색할 학번 입력: ");
+        scanf("%d", &search_id);
+    } else {
+        // 학과로 검색하는 경우
+        printf("검색할 학과 입력: ");
+        scanf("%s", search_term);
+    }
 
     char line[200];
     int found = 0;
 
-    // fgets 함수를 사용해 한 줄씩 읽습니다.
-    // fgets는 file 포인터가 가리키는 파일에서 문자열을 읽어와 line 배열에 저장합니다.
+    // 파일을 한 줄씩 읽어가며 검색 조건에 맞는지 확인
     while (fgets(line, sizeof(line), file)) {
         Student student;
-        sscanf(line, "%[^,],%[^,],%[^,],%[^,],%s", student.id, student.name, student.department, student.email, student.phone);
+        sscanf(line, "%d,%[^,],%[^,],%[^,],%s", &student.id, student.name, student.department, student.email, student.phone);
 
-        if ((search_type == 1 && strcmp(student.id, search_term) == 0) ||
-            (search_type == 2 && strcmp(student.department, search_term) == 0)) {
-            printf("학번: %s, 이름: %s, 학과: %s, 이메일: %s, 전화번호: %s\n", student.id, student.name, student.department, student.email, student.phone);
+        // 검색 조건에 따라 학번 또는 학과로 비교
+        if ((search_type == 1 && student.id == search_id) ||  // 학번 검색
+            (search_type == 2 && strcmp(student.department, search_term) == 0)) {  // 학과 검색
+            printf("학번: %d, 이름: %s, 학과: %s, 이메일: %s, 전화번호: %s\n",
+                   student.id, student.name, student.department, student.email, student.phone);
             found = 1;
-        }
+            }
     }
 
     if (!found) {
         printf("검색 결과가 없습니다.\n");
     }
 
-    // 읽기 작업이 끝난 후 파일을 닫습니다.
     fclose(file);
 }
 
@@ -217,17 +220,18 @@ void export_students() {
     fclose(output_file);    // 내보내기 파일 닫기
 }
 
+// 학생 정보 수정 함수
 void edit_student() {
-    char edit_id[10];
+    int edit_id;
     printf("수정할 학번 입력: ");
-    scanf("%s", edit_id);
+    scanf("%d", &edit_id);  // 수정할 학번을 int로 입력
 
     Student students[100];
     int count = load_students(students);
     int found = 0;
 
     for (int i = 0; i < count; i++) {
-        if (strcmp(students[i].id, edit_id) == 0) {
+        if (students[i].id == edit_id) {  // 학번을 int로 비교
             found = 1;
             int edit_choice;
             printf("수정할 항목을 선택하세요:\n");
@@ -237,19 +241,24 @@ void edit_student() {
             printf("새 값을 입력하세요: ");
             switch (edit_choice) {
             case 1:
-                scanf("%s", students[i].id);
+                // 학번 수정 - 새 학번을 int로 입력받음
+                    scanf("%d", &students[i].id);
                 break;
             case 2:
-                scanf("%s", students[i].name);
+                // 이름 수정
+                    scanf("%s", students[i].name);
                 break;
             case 3:
-                scanf("%s", students[i].department);
+                // 학과 수정
+                    scanf("%s", students[i].department);
                 break;
             case 4:
-                scanf("%s", students[i].email);
+                // 이메일 수정
+                    scanf("%s", students[i].email);
                 break;
             case 5:
-                scanf("%s", students[i].phone);
+                // 전화번호 수정
+                    scanf("%s", students[i].phone);
                 break;
             default:
                 printf("잘못된 선택입니다.\n");
@@ -267,11 +276,12 @@ void edit_student() {
     }
 }
 
+
 // 학생 정보를 삭제하는 함수
 void delete_student() {
-    char delete_id[10];
+    int delete_id;
     printf("삭제할 학번 입력: ");
-    scanf("%s", delete_id);
+    scanf("%d", &delete_id);  // 삭제할 학번을 int로 입력받음
 
     // 원본 파일을 읽기 전용 모드로 열고, 임시 파일을 쓰기 모드로 엽니다.
     // 임시파일을 사용하는 이유는 C에서는 파일에서 특정 데이터를 직접 삭제할 수 없습니다.
@@ -281,7 +291,7 @@ void delete_student() {
     FILE *file = fopen(FILENAME, "r");
     FILE *temp_file = fopen(TEMP_FILENAME, "w");
 
-    // 혹시나 하는 오류로 인한 에러 체크기
+    // 파일 열기 오류 처리
     if (file == NULL || temp_file == NULL) {
         perror("파일 열기 오류");
         if (file) fclose(file);
@@ -289,36 +299,32 @@ void delete_student() {
         return;
     }
 
-    char line[200]; // 원본 파일에서 한 줄씩 읽어올 배열 (나중에 학생 수가 더 많으면 늘려야 함)
+    char line[200];
     int found = 0;
 
-    // 이 코드는 원본 파일에서 한 줄씩 학생 정보를 읽어와, 삭제할 학번과 비교하여 삭제 대상이 아닌 데이터만 임시 파일에 기록합니다.
-    // 학번이 삭제할 ID와 일치하지 않는 경우에만 임시 파일에 저장합니다.
-    // 학번이 삭제할 ID와 일치하는 경우에는 found 변수를 1로 설정하여, 삭제할 데이터가 존재했음을 표시합니다.
-    // 마지막에 임시 파일을 원본 파일로 대체하여, 삭제된 데이터를 반영한 파일을 생성합니다.
+    // 파일을 한 줄씩 읽어가며 삭제할 학번과 비교
     while (fgets(line, sizeof(line), file)) {
         Student student;
-        sscanf(line, "%[^,],%[^,],%[^,],%[^,],%s", student.id, student.name, student.department, student.email, student.phone);
+        sscanf(line, "%d,%[^,],%[^,],%[^,],%s", &student.id, student.name, student.department, student.email, student.phone);
 
-        // 학번이 일치하지 않으면 임시 파일에 기록
-        if (strcmp(student.id, delete_id) != 0) {
-            fprintf(temp_file, "%s,%s,%s,%s,%s\n", student.id, student.name, student.department, student.email, student.phone);
+        // 학번이 삭제할 ID와 일치하지 않으면 임시 파일에 기록
+        if (student.id != delete_id) {
+            fprintf(temp_file, "%d,%s,%s,%s,%s\n", student.id, student.name, student.department, student.email, student.phone);
         } else {
             found = 1;
         }
     }
 
-    // 파일은 꼭 닫아주기.
     fclose(file);
     fclose(temp_file);
 
     if (found) {
-        // 원본 파일 삭제 후 임시 파일로 바꿔치기
+        // 원본 파일 삭제 후 임시 파일을 원본 파일 이름으로 변경
         remove(FILENAME);
         rename(TEMP_FILENAME, FILENAME);
-        printf("학번 %s의 정보가 삭제되었습니다.\n", delete_id);
+        printf("학번 %d의 정보가 삭제되었습니다.\n", delete_id);
     } else {
-        printf("학번 %s의 정보를 찾을 수 없습니다.\n", delete_id);
+        printf("학번 %d의 정보를 찾을 수 없습니다.\n", delete_id);
         remove(TEMP_FILENAME);
     }
 }
