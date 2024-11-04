@@ -79,7 +79,7 @@ void add_student() {
     }
 
     save_students(students, count);    // 정렬된 학생 정보를 파일에 저장
-    printf("학생 정보가 추가되고 정렬되었습니다.\n");
+    printf("학생 정보가 추가되었습니다. (버블정렬 하는 중..)\n");
 }
 
 // 학생 정보 검색 함수
@@ -207,9 +207,9 @@ void export_students() {
 
     // 검색 결과가 없는 경우 사용자에게 알림
     if (!found && (export_type == 2 || export_type == 3)) {
-        printf("내보낼 정보가 없습니다.\n");
+        printf("내보낼 학생 정보가 없습니다.\n");
     } else {
-        printf("%s에 내보내기 완료되었습니다.\n", filename); // 내보내기 완료 메시지 출력
+        printf("%s의 내보내기가 완료되었습니다.\n", filename); // 내보내기 완료 메시지 출력
     }
 
     fclose(file);                     // 원본 파일 닫기
@@ -237,7 +237,7 @@ void edit_student() {
             printf("1. 학번\n2. 이름\n3. 학과\n4. 이메일\n5. 전화번호\n항목 선택: ");
             scanf("%d", &edit_choice);    // 항목 선택 입력받기
 
-            printf("새 값을 입력하세요: "); // 새 값 입력 요청
+            printf("수정할 값을 입력하세요: "); // 새 값 입력 요청
 
             switch (edit_choice) {
             case 1:
