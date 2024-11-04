@@ -88,7 +88,7 @@ void search_student() {
     int search_type;                   // 검색 타입 변수
 
     if (file == NULL) {                // 파일이 열리지 않으면 오류 메시지 출력 후 종료
-        perror("파일 열기 오류");
+        perror("파일 열기 오류");         // 빨간 글씨 오류
         return;
     }
 
@@ -149,7 +149,7 @@ void export_students() {
     int export_type;                   // 내보내기 방법을 저장할 변수
 
     if (file == NULL) {                // 파일 열기 오류 처리
-        perror("파일 열기 오류");
+        perror("파일 열기 오류");         // 빨간 글씨 오류
         return;
     }
 
@@ -180,7 +180,7 @@ void export_students() {
     }
 
     if (output_file == NULL) {        // 내보내기 파일 열기 오류 처리
-        perror("파일 작성 오류");
+        perror("파일 작성 오류");        // 빨간 글씨 오류
         fclose(file);                 // 원본 파일 닫기
         return;
     }
