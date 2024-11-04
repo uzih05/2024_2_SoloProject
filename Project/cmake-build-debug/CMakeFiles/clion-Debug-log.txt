@@ -1,4 +1,10 @@
-"C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\luvwl\CLionProjects\Project -B C:\Users\luvwl\CLionProjects\Project\cmake-build-debug
--- Configuring done (0.1s)
+/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /Users/uzih05/Git/2024_2_SoloProject/Project -B /Users/uzih05/Git/2024_2_SoloProject/Project/cmake-build-debug
+-- The C compiler identification is AppleClang 16.0.0.16000026
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
--- Build files have been written to: C:/Users/luvwl/CLionProjects/Project/cmake-build-debug
+-- Build files have been written to: /Users/uzih05/Git/2024_2_SoloProject/Project/cmake-build-debug
